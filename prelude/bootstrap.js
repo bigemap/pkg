@@ -24,7 +24,7 @@ const Module = require('module');
 const path = require('path');
 const { promisify, _extend } = require('util');
 const { Script } = require('vm');
-const { tmpdir } = require('os');
+var { tmpdir } = require('os');
 const util = require('util');
 const {
   brotliDecompress,
