@@ -61,6 +61,7 @@ const NODE_VERSION_MINOR = process.version.match(/^v\d+.(\d+)/)[1] | 0;
 const ARGV0 = process.argv[0];
 const EXECPATH = process.execPath;
 let ENTRYPOINT = process.argv[1];
+let PKG_TEMPDIR = '';
 
 if (process.env.PKG_EXECPATH === 'PKG_INVOKE_NODEJS') {
   return { undoPatch: true };
@@ -72,6 +73,11 @@ if (NODE_VERSION_MAJOR < 12 || require('worker_threads').isMainThread) {
     // will obviously lack any work in node_main.cc
     throw new Error('PKG_DUMMY_ENTRYPOINT EXPECTED');
   }
+}
+
+if (process.env.PKG_TEMPDIR) {
+  PKG_TEMPDIR = process.env.PKG_TEMPDIR;
+  tmpdir = function() { return PKG_TEMPDIR; }
 }
 
 if (process.env.PKG_EXECPATH === EXECPATH) {
@@ -711,7 +717,7 @@ function payloadFileSync(pointer) {
   });
   function deflateSync(snapshotFilename) {
     if (!tmpFolder) {
-      tmpFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'pkg-'));
+      tmpFolder = fs.mkdtempSync(path.join(tmpdir(), 'pkg-'));
     }
     const content = fs.readFileSync(snapshotFilename, { encoding: 'binary' });
     // content is already unzipped !
